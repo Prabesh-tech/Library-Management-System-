@@ -9,6 +9,7 @@ import model.Staff;
 import service.UserService;
 import exception.UserNotFoundException;
 import exception.InvalidInputException;
+import util.PasswordUtil;
 import util.ValidationUtil;
 
 import java.time.LocalDateTime;
@@ -131,7 +132,7 @@ public class UserController {
         }
 
         User user = findUserByEmail(identifier);
-        user.setPassword(newPassword);
+        user.setPassword(PasswordUtil.hashPassword(newPassword));
         boolean updated = userService.updateUser(user);
         if (updated) {
             passwordResetTokens.remove(user.getLibraryId().trim().toLowerCase());

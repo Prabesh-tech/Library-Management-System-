@@ -47,7 +47,7 @@ public class ReservationView extends JFrame {
 
         JPanel formPanel = new JPanel(new GridLayout(0, 2, 8, 8));
         JTextField bookIdField = new JTextField();
-        JTextField memberIdField = new JTextField(currentUser != null ? currentUser.getUserId() : "");
+        JTextField memberIdField = new JTextField(currentUser != null ? currentUser.getLibraryId() : "");
 
         formPanel.add(new JLabel("Book ID:"));
         formPanel.add(bookIdField);

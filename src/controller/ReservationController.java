@@ -40,12 +40,12 @@ public class ReservationController {
         if (book == null) {
             throw new InvalidInputException("bookId", "Book not found.");
         }
-        User user = userService.getUserById(userId);
+        User user = userService.getUserByLibraryId(userId);
         if (user == null) {
             throw new InvalidInputException("userId", "Member not found.");
         }
 
-        Reservation reservation = new Reservation(reservationId, bookId, userId, 0, LocalDateTime.now().plusDays(7));
+        Reservation reservation = new Reservation(reservationId, bookId, user.getLibraryId(), 0, LocalDateTime.now().plusDays(7));
         if (reservationService.createReservation(reservation)) {
             return reservation;
         }
