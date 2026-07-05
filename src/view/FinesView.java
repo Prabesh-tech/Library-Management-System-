@@ -4,10 +4,12 @@ import model.Fine;
 import model.User;
 import service.FineService;
 import service.AuthService;
+import util.FileHandler;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.File;
 import java.util.List;
 
 /**
@@ -23,6 +25,7 @@ public class FinesView extends JFrame {
     private final DefaultTableModel finesTableModel;
     private final JComboBox<String> paymentMethodCombo;
     private final JLabel totalUnpaidLabel;
+    private final JButton downloadButton;
 
     public FinesView(User currentUser) {
         this.currentUser = currentUser;
@@ -68,6 +71,10 @@ public class FinesView extends JFrame {
         JButton refreshButton = new JButton("Refresh");
         refreshButton.addActionListener(e -> refreshFines());
 
+        downloadButton = new JButton("Download Fines");
+        downloadButton.setEnabled(authService.hasAccessLevel(currentUser, config.AppConfig.ACCESS_LIBRARIAN));
+        downloadButton.addActionListener(e -> downloadFines());
+
         JButton markPaidButton = new JButton("Mark Selected Paid");
         markPaidButton.setEnabled(authService.hasPermission(currentUser, "manage_fines"));
         markPaidButton.addActionListener(e -> {
@@ -93,6 +100,7 @@ public class FinesView extends JFrame {
 
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
         actions.add(refreshButton);
+        actions.add(downloadButton);
         actions.add(markPaidButton);
         actions.add(new JLabel("Payment method:"));
         actions.add(paymentMethodCombo);
@@ -105,8 +113,8 @@ public class FinesView extends JFrame {
 
     private void refreshFines() {
         finesTableModel.setRowCount(0);
-        List<Fine> fines = authService.hasAccessLevel(currentUser, config.AppConfig.ACCESS_ADMIN)
-                ? fineService.getUnpaidFines()
+        List<Fine> fines = authService.hasAccessLevel(currentUser, config.AppConfig.ACCESS_LIBRARIAN)
+                ? fineService.getAllFines()
                 : fineService.getUserFines(currentUser.getUserId());
 
         double totalUnpaid = 0.0;
@@ -127,5 +135,56 @@ public class FinesView extends JFrame {
         }
 
         totalUnpaidLabel.setText(String.format("Total unpaid fines: %.2f", totalUnpaid));
+        downloadButton.setEnabled(authService.hasAccessLevel(currentUser, config.AppConfig.ACCESS_LIBRARIAN) && !fines.isEmpty());
+    }
+
+    private void downloadFines() {
+        List<Fine> fines = authService.hasAccessLevel(currentUser, config.AppConfig.ACCESS_LIBRARIAN)
+                ? fineService.getAllFines()
+                : fineService.getUserFines(currentUser.getUserId());
+
+        if (fines == null || fines.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "There is no fine history to export.", "Export Failed", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        StringBuilder csv = new StringBuilder();
+        csv.append("Fine ID,Loan ID,User ID,Amount,Status,Issued At,Paid At,Reason\n");
+        for (Fine fine : fines) {
+            csv.append(escapeCsv(fine.getFineId())).append(",")
+               .append(escapeCsv(fine.getLoanId())).append(",")
+               .append(escapeCsv(fine.getUserId())).append(",")
+               .append(String.format("%.2f", fine.getAmount())).append(",")
+               .append(fine.isPaid() ? "Paid" : "Unpaid").append(",")
+               .append(escapeCsv(fine.getIssuedAt() != null ? fine.getIssuedAt().toString() : "")).append(",")
+               .append(escapeCsv(fine.getPaidAt() != null ? fine.getPaidAt().toString() : "")).append(",")
+               .append(escapeCsv(fine.getReason())).append("\n");
+        }
+
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Save Fine History");
+        chooser.setSelectedFile(new File("fine-history.csv"));
+        int option = chooser.showSaveDialog(this);
+        if (option != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        String filePath = chooser.getSelectedFile().getAbsolutePath();
+        if (FileHandler.writeToFile(filePath, csv.toString())) {
+            JOptionPane.showMessageDialog(this, "Fine history exported to " + filePath, "Export Successful", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Unable to export fine history.", "Export Failed", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private String escapeCsv(String value) {
+        if (value == null) {
+            return "";
+        }
+        String escaped = value.replace("\"", "\"\"");
+        if (escaped.contains(",") || escaped.contains("\n") || escaped.contains("\r") || escaped.contains("\"")) {
+            return "\"" + escaped + "\"";
+        }
+        return escaped;
     }
 }

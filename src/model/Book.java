@@ -25,6 +25,10 @@ public class Book implements Serializable {
     private String isbn;
     /** Genre / category, e.g. "Fiction", "Science", "History" */
     private String genre;
+    /** Library category label for filtering and browsing */
+    private String category;
+    /** Optional image path for book cover uploads */
+    private String imagePath;
     /** Publisher name */
     private String publisher;
     /** Year of publication */
@@ -62,6 +66,8 @@ public class Book implements Serializable {
         this.author          = author;
         this.isbn            = isbn;
         this.genre           = genre;
+        this.category        = genre;
+        this.imagePath       = "";
         this.publisher       = publisher;
         this.publicationYear = publicationYear;
         this.description     = description;
@@ -157,6 +163,12 @@ public class Book implements Serializable {
     public String getGenre()           { return genre; }
     public void   setGenre(String g)   { this.genre = g; }
 
+    public String getCategory()        { return category; }
+    public void   setCategory(String c){ this.category = c; }
+
+    public String getImagePath()       { return imagePath; }
+    public void   setImagePath(String p){ this.imagePath = p; }
+
     public String getPublisher()       { return publisher; }
     public void   setPublisher(String p){ this.publisher = p; }
 
@@ -196,7 +208,7 @@ public class Book implements Serializable {
      */
     public String toFileString() {
         return bookId + "|" + title + "|" + author + "|" + isbn + "|"
-                + genre  + "|" + publisher + "|" + publicationYear + "|"
+                + genre  + "|" + category + "|" + imagePath + "|" + publisher + "|" + publicationYear + "|"
                 + description + "|" + language + "|" + pages + "|"
                 + totalCopies + "|" + availableCopies + "|" + location + "|" + active;
     }

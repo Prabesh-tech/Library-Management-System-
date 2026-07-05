@@ -225,4 +225,13 @@ public class LoanController {
     public List<Loan> getLoansWithFines() {
         return loanService.getLoansWithUnpaidFines();
     }
+
+    /**
+     * Retrieves all loans in the system.
+     *
+     * @return List of all loans.
+     */
+    public List<Loan> getAllLoans() {
+        return loanService.getAllLoans();
+    }
 }

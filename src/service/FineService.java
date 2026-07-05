@@ -54,4 +54,8 @@ public class FineService {
     public List<Fine> getUnpaidFines() {
         return fineRepository.findUnpaid();
     }
+
+    public List<Fine> getAllFines() {
+        return fineRepository.findAll();
+    }
 }

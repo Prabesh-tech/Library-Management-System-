@@ -9,7 +9,6 @@ import model.User;
 import service.AuthService;
 import exception.InvalidInputException;
 import util.IDGenerator;
-import config.AppConfig;
 import java.awt.GridLayout;
 
 /**
@@ -26,6 +25,7 @@ public class BookView extends JFrame {
     private AuthService authService;
     private JTable booksTable;
     private DefaultTableModel tableModel;
+    private JTextField searchField;
 
     public BookView(User currentUser) {
         this.currentUser = currentUser;
@@ -47,7 +47,7 @@ public class BookView extends JFrame {
         // Search panel
         JLabel searchLabel = new JLabel("Search:");
         searchLabel.setBounds(50, 20, 100, 25);
-        JTextField searchField = new JTextField();
+        searchField = new JTextField();
         searchField.setBounds(150, 20, 300, 25);
         JButton searchButton = new JButton("Search");
         searchButton.setBounds(460, 20, 100, 25);
@@ -59,7 +59,7 @@ public class BookView extends JFrame {
 
         // Books table
         tableModel = new DefaultTableModel(
-                new Object[]{"ID", "Title", "Author", "Genre", "ISBN", "Available", "Total", "Location"}, 0) {
+                new Object[]{"ID", "Title", "Author", "Genre", "Category", "ISBN", "Available", "Total", "Location", "Image"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -176,10 +176,12 @@ public class BookView extends JFrame {
                     book.getTitle(),
                     book.getAuthor(),
                     book.getGenre(),
+                    book.getCategory() != null ? book.getCategory() : book.getGenre(),
                     book.getIsbn(),
                     book.getAvailableCopies(),
                     book.getTotalCopies(),
-                    book.getLocation()
+                    book.getLocation(),
+                    book.getImagePath()
             });
         }
     }
@@ -190,6 +192,8 @@ public class BookView extends JFrame {
         JTextField authorField = new JTextField();
         JTextField isbnField = new JTextField();
         JTextField genreField = new JTextField();
+        JTextField categoryField = new JTextField();
+        JTextField imagePathField = new JTextField("images/default-book.png");
         JTextField publisherField = new JTextField("Unknown");
         JTextField yearField = new JTextField(String.valueOf(java.time.LocalDate.now().getYear()));
         JTextField pagesField = new JTextField("0");
@@ -200,6 +204,8 @@ public class BookView extends JFrame {
         form.add(new JLabel("Author:")); form.add(authorField);
         form.add(new JLabel("ISBN:")); form.add(isbnField);
         form.add(new JLabel("Genre:")); form.add(genreField);
+        form.add(new JLabel("Category:")); form.add(categoryField);
+        form.add(new JLabel("Image Path:")); form.add(imagePathField);
         form.add(new JLabel("Publisher:")); form.add(publisherField);
         form.add(new JLabel("Publication Year:")); form.add(yearField);
         form.add(new JLabel("Pages:")); form.add(pagesField);
@@ -216,6 +222,8 @@ public class BookView extends JFrame {
         String author = authorField.getText().trim();
         String isbn = isbnField.getText().trim();
         String genre = genreField.getText().trim();
+        String category = categoryField.getText().trim();
+        String imagePath = imagePathField.getText().trim();
         String publisher = publisherField.getText().trim();
         String yearText = yearField.getText().trim();
         String pagesText = pagesField.getText().trim();
@@ -240,6 +248,8 @@ public class BookView extends JFrame {
             Book book = new Book(IDGenerator.generateBookId(), title, author, isbn,
                     genre, publisher, publicationYear, "", "English", pages,
                     totalCopies, totalCopies, location);
+            book.setCategory(category.isEmpty() ? genre : category);
+            book.setImagePath(imagePath);
             bookController.addBook(book);
             JOptionPane.showMessageDialog(this, "Book added successfully.",
                     "Success", JOptionPane.INFORMATION_MESSAGE);
@@ -277,6 +287,8 @@ public class BookView extends JFrame {
         JTextField authorField = new JTextField(book.getAuthor() != null ? book.getAuthor() : "");
         JTextField isbnField = new JTextField(book.getIsbn() != null ? book.getIsbn() : "");
         JTextField genreField = new JTextField(book.getGenre() != null ? book.getGenre() : "");
+        JTextField categoryField = new JTextField(book.getCategory() != null ? book.getCategory() : "");
+        JTextField imagePathField = new JTextField(book.getImagePath() != null ? book.getImagePath() : "");
         JTextField publisherField = new JTextField(book.getPublisher() != null ? book.getPublisher() : "");
         JTextField yearField = new JTextField(String.valueOf(book.getPublicationYear()));
         JTextField pagesField = new JTextField(String.valueOf(book.getPages()));
@@ -287,6 +299,8 @@ public class BookView extends JFrame {
         form.add(new JLabel("Author:")); form.add(authorField);
         form.add(new JLabel("ISBN:")); form.add(isbnField);
         form.add(new JLabel("Genre:")); form.add(genreField);
+        form.add(new JLabel("Category:")); form.add(categoryField);
+        form.add(new JLabel("Image Path:")); form.add(imagePathField);
         form.add(new JLabel("Publisher:")); form.add(publisherField);
         form.add(new JLabel("Publication Year:")); form.add(yearField);
         form.add(new JLabel("Pages:")); form.add(pagesField);
@@ -303,6 +317,8 @@ public class BookView extends JFrame {
         String author = authorField.getText().trim();
         String isbn = isbnField.getText().trim();
         String genre = genreField.getText().trim();
+        String category = categoryField.getText().trim();
+        String imagePath = imagePathField.getText().trim();
         String publisher = publisherField.getText().trim();
         String yearText = yearField.getText().trim();
         String pagesText = pagesField.getText().trim();
@@ -328,6 +344,8 @@ public class BookView extends JFrame {
             book.setAuthor(author);
             book.setIsbn(isbn);
             book.setGenre(genre);
+            book.setCategory(category.isEmpty() ? genre : category);
+            book.setImagePath(imagePath);
             book.setPublisher(publisher);
             book.setPublicationYear(publicationYear);
             book.setPages(pages);

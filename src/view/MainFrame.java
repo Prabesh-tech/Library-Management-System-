@@ -1,7 +1,6 @@
 package view;
 
 import javax.swing.*;
-import javax.swing.UIManager;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import config.AppConfig;
@@ -19,7 +18,6 @@ public class MainFrame extends JFrame {
     private JPanel contentPanel;
     private User currentUser;
     private AuthService authService;
-    private boolean darkMode = false;
 
     public MainFrame(User user) {
         this.currentUser = user;
@@ -66,6 +64,10 @@ public class MainFrame extends JFrame {
                 }
             });
             addSidebarButton(sidebar, "Authors", e -> openWindow(new AuthorView(currentUser)));
+        }
+
+        if (authService.hasAccessLevel(currentUser, AppConfig.ACCESS_SUPERADMIN)) {
+            addSidebarButton(sidebar, "System Tools", e -> openWindow(new SystemToolsView(currentUser)));
         }
 
         if (authService.hasPermission(currentUser, "manage_users") || authService.hasAccessLevel(currentUser, AppConfig.ACCESS_ADMIN)) {

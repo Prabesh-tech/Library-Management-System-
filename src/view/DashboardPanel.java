@@ -27,6 +27,7 @@ public class DashboardPanel extends JPanel {
 
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
         actionPanel.add(createActionButton("View Books", "books"));
+        actionPanel.add(createActionButton("Quick Demo", "demo"));
         if (user.getAccessLevel() >= config.AppConfig.ACCESS_LIBRARIAN) {
             actionPanel.add(createActionButton("Manage Categories", "categories"));
             actionPanel.add(createActionButton("Manage Authors", "authors"));
@@ -57,6 +58,9 @@ public class DashboardPanel extends JPanel {
             switch (action) {
                 case "books":
                     SwingUtilities.invokeLater(() -> new BookView(currentUser).setVisible(true));
+                    break;
+                case "demo":
+                    SwingUtilities.invokeLater(() -> new DemoWorkflowView(currentUser).setVisible(true));
                     break;
                 case "categories":
                     SwingUtilities.invokeLater(() -> new CategoryView(currentUser).setVisible(true));
